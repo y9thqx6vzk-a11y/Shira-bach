@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מסיבת הרווקות של שירה 💍</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Rubik', sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* גלילה מדויקת של מצגת */
+    .slider {
+      height: 100vh;
+      width: 100vw;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+    }
+    .slider::-webkit-scrollbar { display: none; }
+
+    .slide {
+      height: 100vh;
+      width: 100vw;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* שקופית פתיחה */
+    .intro-slide {
+      background: radial-gradient(circle at center, #3b0764 0%, #09090b 85%);
+      text-align: center;
+      flex-direction: column;
+      padding: 2rem;
+    }
+    .intro-slide h1 {
+      font-size: clamp(3rem, 7vw, 6.5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #f472b6, #fb7185, #fde047);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1.5rem;
+      line-height: 1.1;
+    }
+    .intro-slide p {
+      font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+      color: #e2e8f0;
+    }
+
+    /* שקופית קטגוריה / נושא */
+    .topic-slide {
+      background: radial-gradient(circle at center, #1e1b4b 0%, #020617 90%);
+      text-align: center;
+    }
+    .topic-content {
+      z-index: 2;
+      padding: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.6rem 1.8rem;
+      border-radius: 999px;
+      background: rgba(244, 114, 182, 0.15);
+      border: 1px solid rgba(244, 114, 182, 0.5);
+      color: #f472b6;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+    .topic-slide h2 {
+      font-size: clamp(2.8rem, 6vw, 5.5rem);
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+    .topic-slide .count {
+      margin-top: 1rem;
+      font-size: 1.3rem;
+      color: #94a3b8;
+    }
+
+    /* שקופית תמונה - 100% מסך מלא ללא הקטנה! */
+    .image-slide {
+      background-color: #000;
+    }
+    /* רקע מטושטש יוקרתי שממלא שוליים לתמונות אנכיות */
+    .blur-bg {
+      position: absolute;
+      inset: -40px;
+      background-size: cover;
+      background-position: center;
+      filter: blur(35px) brightness(0.35);
+      z-index: 1;
+    }
+    .image-slide img {
+      position: relative;
+      z-index: 2;
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain; /* שומר על פרופורציות ב-100% גודל מסך */
+      transition: transform 0.25s ease;
+    }
+    /* מצב מילוי מוחלט בלחיצה על Z */
+    body.zoom-fill .image-slide img {
+      object-fit: cover;
+    }
+
+    /* סרגל שליטה עליון נסתר שמופיע בהזזת עכבר */
+    .controls {
+      position: fixed;
+      top: 1.2rem;
+      left: 1.2rem;
+      z-index: 100;
+      display: flex;
+      gap: 0.6rem;
+      opacity: 0.2;
+      transition: opacity 0.3s;
+    }
+    .controls:hover { opacity: 1; }
+    .btn {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      padding: 0.6rem 1.1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* מד התקדמות תחתון */
+    .progress-bar {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #ec4899, #eab308);
+      z-index: 100;
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="controls">
+    <button class="btn" onclick="toggleFullscreen()">מסך מלא (F)</button>
+    <button class="btn" onclick="toggleZoom()">התאמת תמונה (Z)</button>
+  </div>
+
+  <div class="progress-bar" id="progress"></div>
+
+  <div class="slider" id="slider">
+    <section class="slide intro-slide">
+      <h1>מסיבת הרווקות של שירה 💍</h1>
+      <p>המשחק מתחיל – גללו למטה או לחצו על החצים במקלדת ↓</p>
+    </section>
+
+    <section class="slide topic-slide">
+      <div class="topic-content">
+        <span class="badge">חלק 1 ✨</span>
+        <h2>שירה בכל מיני מקומות</h2>
+        <p class="count">25 תמונות</p>
+      </div>
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (1).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (1).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (2).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (2).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (3).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (3).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (4).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (4).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (5).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (5).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (6).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39 (6).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39.jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.39.jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (1).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (1).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (2).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (2).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (3).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (3).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (4).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (4).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (5).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (5).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (6).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40 (6).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40.jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.29.40.jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.31.30 (1).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.31.30 (1).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.31.30.jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.31.30.jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.46 (1).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.46 (1).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.46 (2).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.46 (2).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.46 (3).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.46 (3).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.46.jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.46.jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.47 (1).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.47 (1).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.47.jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.33.47.jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.34.16 (1).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.34.16 (1).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.34.16 (2).jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.34.16 (2).jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.34.16.jpeg')"></div>
+      <img src="שירה בכל מיני מקומות/WhatsApp Image 2026-10-28 at 18.34.16.jpeg" loading="lazy" alt="שירה בכל מיני מקומות">
+    </section>
+
+    <section class="slide topic-slide">
+      <div class="topic-content">
+        <span class="badge">חלק 2 ✨</span>
+        <h2>שירה בסרטים וסדרות </h2>
+        <p class="count">34 תמונות</p>
+      </div>
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_אופנהיימר.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_אופנהיימר.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_איך פגשתי.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_איך פגשתי.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_בית הנייר.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_בית הנייר.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_בלונדינית-2.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_בלונדינית-2.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_ברבי.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_ברבי.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_דברים מוזירם.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_דברים מוזירם.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_דברים מוזרים טב.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_דברים מוזרים טב.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_האב מוול סטריט.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_האב מוול סטריט.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_האח הגדול.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_האח הגדול.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_האנטומיה.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_האנטומיה.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_הארי פוטר.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_הארי פוטר.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_הבחורה החדשה.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_הבחורה החדשה.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_היומן.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_היומן.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_המפץ.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_המפץ.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_המשרד.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_המשרד.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_הנוקמים.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_הנוקמים.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_הפיגמות.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_הפיגמות.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_השטן.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_השטן.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_חברים.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_חברים.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_טהרו.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_טהרו.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_טיטאניק.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_טיטאניק.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_ילדות רעות.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_ילדות רעות.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_לה לנד 2.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_לה לנד 2.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_לשבור את הקרח.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_לשבור את הקרח.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_מטריקס.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_מטריקס.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_ממזרים חסרי כבוד.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_ממזרים חסרי כבוד.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_משחקי הדיונון.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_משחקי הדיונון.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_משחקי הרעב.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_משחקי הרעב.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_ספיידי.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_ספיידי.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_סקס והעיר.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_סקס והעיר.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_פאודה.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_פאודה.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_פסטיגל פנטזיה.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_פסטיגל פנטזיה.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_שר הטבעות טוב.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_שר הטבעות טוב.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה בסרטים וסדרות /swapped_שרק.jpeg')"></div>
+      <img src="שירה בסרטים וסדרות /swapped_שרק.jpeg" loading="lazy" alt="שירה בסרטים וסדרות ">
+    </section>
+
+    <section class="slide topic-slide">
+      <div class="topic-content">
+        <span class="badge">חלק 3 ✨</span>
+        <h2>שירה ואנשים </h2>
+        <p class="count">1 תמונות</p>
+      </div>
+    </section>
+
+    <section class="slide image-slide">
+      <div class="blur-bg" style="background-image: url('שירה ואנשים /WhatsApp Image 2026-10-28 at 18.35.47.jpeg')"></div>
+      <img src="שירה ואנשים /WhatsApp Image 2026-10-28 at 18.35.47.jpeg" loading="lazy" alt="שירה ואנשים ">
+    </section>
+
+  </div>
+
+  <script>
+    const slider = document.getElementById('slider');
+    const progress = document.getElementById('progress');
+
+    slider.addEventListener('scroll', () => {
+      const maxScroll = slider.scrollHeight - slider.clientHeight;
+      const pct = maxScroll > 0 ? (slider.scrollTop / maxScroll) * 100 : 0;
+      progress.style.width = pct + '%';
+    });
+
+    window.addEventListener('keydown', (e) => {
+      const h = window.innerHeight;
+      if (['ArrowDown', 'PageDown', 'Space', 'ArrowLeft'].includes(e.code)) {
+        e.preventDefault();
+        slider.scrollBy({ top: h, behavior: 'smooth' });
+      } else if (['ArrowUp', 'PageUp', 'ArrowRight'].includes(e.code)) {
+        e.preventDefault();
+        slider.scrollBy({ top: -h, behavior: 'smooth' });
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 'z' || e.key === 'Z') {
+        toggleZoom();
+      }
+    });
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    function toggleZoom() {
+      document.body.classList.toggle('zoom-fill');
+    }
+  </script>
+</body>
+</html>
